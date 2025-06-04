@@ -21,6 +21,7 @@ def main():
     parser.add_argument("--output-td-spec", type=Path, default="tuning-spec.mlir")
     parser.add_argument("--starter-td-spec", type=Path)
     parser.add_argument("--num-candidates", type=int, default=100)
+    parser.add_argument("--devices", type=str, default="hip://0")
     args, extra_cli_args = parser.parse_known_args()
 
     if args.commands_file:
@@ -70,7 +71,7 @@ def main():
             *("--starter-td-spec", str(args.output_td_spec)),
             *("--output-td-spec", str(args.output_td_spec)),
             "--compile-flags-file=/home/rkayaith/repos/shark-ai/sharktuner/model_tuner/compile_flags.txt",
-            "--devices=hip://0",
+            f"--devices={args.devices}",
             "--model-tuner-num-dispatch-candidates=100",
             f"--num-candidates={args.num_candidates}",
             "--codegen-pipeline=llvmgpu_tile_and_fuse",
