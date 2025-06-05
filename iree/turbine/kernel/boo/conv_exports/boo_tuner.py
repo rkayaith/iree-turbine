@@ -41,6 +41,7 @@ def main():
         print(f">>> ({idx+1}/{len(mio_file_args)}) {shlex.join(cli_args)}")
         parser = mio.get_miopen_parser()
         parser.add_argument("-t")
+        parser.add_argument("--iter")
         sig = mio.get_signature(parser.parse_args(cli_args))
         asm = launch._get_module_asm(sig)
 
