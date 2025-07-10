@@ -197,26 +197,22 @@ class generic_conv(CustomOp):
         xl_desc = ksel.attr_str(4)
         wl_desc = ksel.attr_str(5)
         ol_desc = ksel.attr_str(6)
+        # output shape (optional)
+        os_desc = ksel.attr_list_int(7)
 
         xl = xl_desc.v
         xs = list(x_desc.t.shape)
         wl = wl_desc.v
         ws = list(w_desc.t.shape)
         ol = ol_desc.v
-
-        try:
-            os_desc = ksel.attr_list_int(7)
-            os = os_desc.v
-            assert len(os) == len(
-                ol
-            ), f"output size must match output layout. Got {os} for layout {ol}."
-        except Exception as e:
-            logger.debug(
-                "Invalid output shape provided for generic_conv. Falling back to default output shape calculation. Failed with exception %s.",
-                str(e),
-            )
+        os = os_desc.v
+        if len(os) == 0:  # FIXME: Should actually be a check for 'None'
             os = [-1] * len(ol)
 
+        torch._check(
+            len(os) == len(ol),
+            lambda: f"output size must match output layout. Got {os} for layout {ol}.",
+        )
         torch._check(
             len(xl) == len(xs),
             lambda: f'Length of input layout should match rank. Got layout "{xl}" for tensor with shape {xs}.',
