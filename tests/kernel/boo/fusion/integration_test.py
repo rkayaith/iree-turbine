@@ -125,3 +125,68 @@ def test_output_layout(device: str, memory_format: torch.memory_format):
         assert isinstance(expected_result, torch.Tensor)
         assert actual_result.shape == expected_result.shape
         assert actual_result.stride() == expected_result.stride()
+
+
+def test_batch_norm_layer():
+    """Test that we're using our custom convolution op"""
+    # memory_format = torch.channels_last
+    memory_format = torch.channels_last
+    with torch.device("cuda"):
+        N, C, H, W = (128, 384, 24, 48)
+        input = torch.randn((N, C, H, W), dtype=torch.bfloat16).to(
+            memory_format=memory_format
+        )
+        model = torch.nn.BatchNorm2d(num_features=C).to(memory_format=memory_format)
+        recorder = EagerAndRecordGraphs()
+        compiled_model = torch.compile(
+            model,
+            backend=boo.backend(nested_backend=recorder),
+        )
+
+        compiled_model(input)
+
+        [compiled_module] = recorder.graphs
+        assert isinstance(compiled_module, fx.GraphModule)
+
+
+@pytest.mark.parametrize("backend", ["iree_boo", "inductor", "eager"])
+def test_batch_norm_bench(backend: str):
+    with torch.device("cuda"):
+        memory_format = torch.channels_last
+        weight = torch.randn((384,), dtype=torch.float)
+        bias = torch.randn((384,), dtype=torch.float)
+        running_mean = torch.randn((384,), dtype=torch.float)
+        running_var = torch.randn((384,), dtype=torch.float)
+        training = True
+        exponential_average_factor = 0.1
+        epsilon = 1e-5
+
+        def model(input: torch.Tensor):
+            return torch.ops.aten.miopen_batch_norm(
+                input,
+                weight,
+                bias,
+                running_mean,
+                running_var,
+                training,
+                exponential_average_factor,
+                epsilon,
+            )
+
+        compiled_model = torch.compile(model, backend=backend)
+        input = torch.randn((128, 384, 24, 48), dtype=torch.bfloat16).to(
+            memory_format=memory_format
+        )
+        steps = 100
+        with torch.profiler.profile(
+            activities=[torch.profiler.ProfilerActivity.CUDA],
+            schedule=torch.profiler.schedule(wait=1, warmup=10, active=steps),
+        ) as prof:
+            result = None
+            for _ in range(11 + steps):
+                result = compiled_model(input)
+                torch.cuda.synchronize()
+                prof.step()
+        print(prof.key_averages().table(sort_by="self_device_time_total"))
+        assert isinstance(result, tuple)
+        print(f"result={tuple(type(r) for r in result)}")
