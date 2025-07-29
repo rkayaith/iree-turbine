@@ -12,7 +12,11 @@ from typing import Callable, Dict, Sequence
 import torch
 from torch.fx.node import Target, Node
 
-from .replacement import ReplacementSchema, replace_aten_convolution
+from .replacement import (
+    ReplacementSchema,
+    replace_aten_convolution,
+    replace_miopen_batch_norm,
+)
 
 
 @dataclass
@@ -73,8 +77,13 @@ DEFAULT_SUPPORTED_BOO_FUSIONS: FusionSchema = {
             torch.ops.aten.sigmoid.default,
         ),
     ),
+    torch.ops.aten.miopen_batch_norm.default: OpFusionSpec(),  # this will break, we should rewrite back to aten._native or disable the translation somehow
+    torch.ops.aten._native_batch_norm_legit_functional.default: OpFusionSpec(
+        make_single_dispatch=True
+    ),
 }
 
 DEFAULT_POST_FUSION_REPLACEMENTS: ReplacementSchema = {
-    torch.ops.aten.convolution.default: replace_aten_convolution
+    torch.ops.aten.convolution.default: replace_aten_convolution,
+    torch.ops.aten.miopen_batch_norm.default: replace_miopen_batch_norm,
 }

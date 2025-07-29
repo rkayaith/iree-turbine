@@ -248,6 +248,7 @@ def get_launchable(
         )
         extra_flags = [
             "--iree-llvmgpu-set-workgroup-distribution-along=x",
+            "--iree-opt-level=O3",
         ]
         if BOO_TUNING_SPEC_PATH != "":
             extra_flags.append(
