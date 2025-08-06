@@ -153,10 +153,10 @@ def test_batch_norm_layer():
 def test_batch_norm_bench(backend: str):
     with torch.device("cuda"):
         memory_format = torch.channels_last
-        weight = torch.randn((384,), dtype=torch.float)
-        bias = torch.randn((384,), dtype=torch.float)
-        running_mean = torch.randn((384,), dtype=torch.float)
-        running_var = torch.randn((384,), dtype=torch.float)
+        weight = torch.randn((384,), dtype=torch.bfloat16)
+        bias = torch.randn((384,), dtype=torch.bfloat16)
+        running_mean = torch.randn((384,), dtype=torch.bfloat16)
+        running_var = torch.randn((384,), dtype=torch.bfloat16)
         training = True
         exponential_average_factor = 0.1
         epsilon = 1e-5
