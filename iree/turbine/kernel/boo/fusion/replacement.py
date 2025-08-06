@@ -66,10 +66,3 @@ def replace_aten_convolution(args: tuple[Argument, ...], meta: dict[str, object]
         groups,
         output_is_channels_last,
     )
-
-
-def replace_miopen_batch_norm(
-    args: tuple[Argument, ...], meta: dict[str, object]
-) -> tuple[Callable, tuple[Argument, ...]]:
-    "Replace 'torch.ops.aten.miopen_batch_norm' with native batch norm."
-    return torch.ops.aten._native_batch_norm_legit_functional.default, args
