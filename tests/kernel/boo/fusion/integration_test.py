@@ -162,7 +162,7 @@ def test_batch_norm_bench(backend: str):
         epsilon = 1e-5
 
         def model(input: torch.Tensor):
-            return torch.ops.aten.miopen_batch_norm(
+            return torch.ops.aten._native_batch_norm_legit_functional(
                 input,
                 weight,
                 bias,
