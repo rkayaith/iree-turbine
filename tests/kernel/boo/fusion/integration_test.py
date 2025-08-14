@@ -152,11 +152,12 @@ def test_batch_norm_layer():
 @pytest.mark.parametrize("backend", ["iree_boo", "inductor", "eager"])
 def test_batch_norm_bench(backend: str):
     with torch.device("cuda"):
+        N, C, H, W = 128, 384, 24, 48
         memory_format = torch.channels_last
-        weight = torch.randn((384,), dtype=torch.bfloat16)
-        bias = torch.randn((384,), dtype=torch.bfloat16)
-        running_mean = torch.randn((384,), dtype=torch.bfloat16)
-        running_var = torch.randn((384,), dtype=torch.bfloat16)
+        weight = torch.randn((C,), dtype=torch.bfloat16)
+        bias = torch.randn((C,), dtype=torch.bfloat16)
+        running_mean = torch.randn((C,), dtype=torch.bfloat16)
+        running_var = torch.randn((C,), dtype=torch.bfloat16)
         training = True
         exponential_average_factor = 0.1
         epsilon = 1e-5
@@ -174,7 +175,7 @@ def test_batch_norm_bench(backend: str):
             )
 
         compiled_model = torch.compile(model, backend=backend)
-        input = torch.randn((128, 384, 24, 48), dtype=torch.bfloat16).to(
+        input = torch.randn((N, C, H, W), dtype=torch.bfloat16).to(
             memory_format=memory_format
         )
         steps = 100
@@ -190,3 +191,44 @@ def test_batch_norm_bench(backend: str):
         print(prof.key_averages().table(sort_by="self_device_time_total"))
         assert isinstance(result, tuple)
         print(f"result={tuple(type(r) for r in result)}")
+
+
+EXAMPLE_SHAPES = [
+    (128, 35, 48, 32),
+    (128, 384, 24, 48),
+    (128, 384, 48, 32),
+    (128, 512, 24, 48),
+    (128, 64, 48, 32),
+    (128, 96, 48, 32),
+    (16, 128, 24, 16),
+    (16, 128, 48, 32),
+    (16, 144, 24, 16),
+    (16, 192, 24, 16),
+    (16, 2048, 16, 32),
+    (16, 2048, 48, 32),
+    (16, 2, 24, 16),
+    (16, 288, 1, 48, 32),
+    (16, 288, 24, 16),
+    (16, 288, 2, 48, 32),
+    (16, 288, 4, 48, 32),
+    (16, 288, 48, 32),
+    (16, 288, 8, 32),
+    (16, 288, 8, 48, 32),
+    (16, 32, 192, 128),
+    (16, 384, 48, 32),
+    (16, 384, 8, 32),
+    (16, 40, 192, 128),
+    (16, 40, 96, 64),
+    (16, 48, 24, 16),
+    (16, 48, 48, 32),
+    (16, 48, 96, 64),
+    (16, 576, 48, 32),
+    (16, 64, 225, 225),
+    (16, 64, 38, 19),
+    (16, 64, 38, 38),
+    (16, 64, 48, 32),
+    (16, 64, 75, 75),
+    (16, 96, 24, 16),
+    (16, 96, 48, 32),
+    (16, 96, 96, 64),
+]
