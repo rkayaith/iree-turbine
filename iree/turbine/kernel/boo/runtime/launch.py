@@ -229,6 +229,7 @@ def default_compiler_flags_callback(device: Device, cache_dir: Path) -> list[str
     if device.driver_id == "hip":
         flags.append("--iree-opt-level=O3")
         flags.append("--iree-dispatch-creation-target-split-reduction-size=1024")
+        # flags.append("--iree-codegen-llvmgpu-test-tile-and-fuse-vectorize=true")
         if BOO_TUNING_SPEC_PATH != "":
             assert Path(
                 BOO_TUNING_SPEC_PATH
