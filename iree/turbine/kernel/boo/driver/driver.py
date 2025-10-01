@@ -104,6 +104,11 @@ list of arguments.
 
 
 def main():
+    # Set saner defaults for pytorch/miopen environment variables. This affects
+    # pytorch's inferred tensor layouts on AMDGPU, even when not actually using
+    # MIOpen kernels, and are required for performance.
+    os.environ.setdefault("PYTORCH_MIOPEN_SUGGEST_NHWC", "1")
+
     # Parse input cli args into global driver args and miopen-style commands.
     driver_parser = _get_main_driver_parser()
     meta_args, extra_cli_args = driver_parser.parse_known_args()
