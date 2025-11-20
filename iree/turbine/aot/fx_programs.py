@@ -65,7 +65,7 @@ class FxPrograms:
     need this hack.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.programs: dict[str, ExportTargetDef] = {}
 
     def save(self, path: Union[str, os.PathLike]) -> int:

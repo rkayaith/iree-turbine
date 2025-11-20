@@ -188,7 +188,7 @@ class TurbineBuilderAction(BuildAction):
         thunk_kwargs,
         concurrency,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(concurrency=concurrency, **kwargs)
         self.thunk = thunk
         self.thunk_args = thunk_args

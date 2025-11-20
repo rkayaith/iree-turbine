@@ -21,13 +21,13 @@ class TypeSubclassMap:
         "_mapping",
     ]
 
-    def __init__(self):
+    def __init__(self) -> None:
         # The linear list of converters.
         self._mapping: List[Tuple[type, Any]] = []
         # When there is a hit on the linear mapping, memoize it here.
         self._cache: Dict[type, Any] = {}
 
-    def map(self, t: type, value: Any):
+    def map(self, t: type, value: Any) -> None:
         self._mapping.append((t, value))
         self._cache[t] = value
 

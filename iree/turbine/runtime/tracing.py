@@ -23,7 +23,7 @@ class RuntimeTracer:
 
     __slots__ = ["enabled"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.enabled: bool = False
 
     def save_jit_kernel_artifacts(

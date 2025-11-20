@@ -133,7 +133,7 @@ def device_factory(func):
     """
 
     def _inner_fn(impl):
-        def _filter_impl(super_fn, *args, **kwargs):
+        def _filter_impl(super_fn, *args, **kwargs) -> object:
             device: Optional[Device] = None
             device_spec = kwargs.get("device", None)
             if device_spec:
