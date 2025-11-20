@@ -48,8 +48,8 @@ class OpSignature(ABC):
         device: str | torch.device | None = None,
         splat_value: int | float | None = None,
         seed: Optional[int] = None,
-    ) -> tuple[torch.Tensor, ...]:
-        """Generates sample arguments as PyTorch tensors for the operation."""
+    ) -> tuple[object, ...]:
+        """Generates sample arguments for the operation."""
         ...
 
     @property
@@ -97,7 +97,7 @@ class OpSignature(ABC):
         self,
         forward_args: tuple[torch.Tensor, ...],
         forward_results: tuple[torch.Tensor, ...],
-    ) -> tuple[torch.Tensor]:
+    ) -> tuple[torch.Tensor, ...]:
         """Arranges arguments and results of the forward pass in a way that they
         can be passed as trailing arguments to the backward pass.
 

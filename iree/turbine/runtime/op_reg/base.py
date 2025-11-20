@@ -105,7 +105,7 @@ class CustomOp(ABC):
         dispatch_key: Union[str, Sequence[str], None] = None,
         register_meta: bool = True,
         register_impl: bool = True,
-    ) -> Callable:
+    ) -> Callable[[type["CustomOp"]], Callable]:  # TODO: Fix this type and fix callers
         """Class decorator for `CustomOp` implementations.
 
         The decorator will instantiate the class and then replace it with

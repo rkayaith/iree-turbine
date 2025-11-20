@@ -4,6 +4,7 @@
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+import typing
 import torch
 from typing import Sequence, Collection, TypeVar
 
@@ -46,14 +47,18 @@ class Permutation:
         assert self.size == other.size, "permutations must be the same size"
         return Permutation([other.items[element] for element in self.items])
 
-    def __call__(self, other: torch.Tensor | Collection[_T]) -> torch.Tensor | list[_T]:
+    @typing.overload
+    def __call__(self, other: torch.Tensor) -> torch.Tensor: ...
+    @typing.overload
+    def __call__(self, other: Sequence[_T]) -> list[_T]: ...
+    def __call__(self, other: torch.Tensor | Sequence[_T]) -> torch.Tensor | list[_T]:
         """apply the permutation to a tensor or iterable (e.g., a shape)"""
         if isinstance(other, torch.Tensor):
             assert (
                 len(other.shape) == self.size
             ), f"permutation must match the rank of the tensor being permuted, got permutation size {self.size} for tensor of shape {other.shape}"
             return torch.permute(other, self.items)
-        if isinstance(other, Collection):
+        if isinstance(other, Sequence):
             assert len(other) == self.size
             return [other[item] for item in self.items]
         raise TypeError(f"Unexpected argument type: {type(other)}.")

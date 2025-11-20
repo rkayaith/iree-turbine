@@ -440,12 +440,12 @@ class ConvForward(torch.nn.Module):
             self.kwargs["bias"] = None
 
     def forward(self, *args: torch.Tensor) -> torch.Tensor:
-        mod_args = [
+        mod_args = (
             self.perms[0](args[0]),
             self.perms[1](args[1]),
-        ]
+        )
         if "bias" not in self.kwargs.keys():
-            mod_args.append(args[2])
+            mod_args += (args[2],)
         output = torch.convolution(*mod_args, **self.kwargs)
         return self.perms[2](output)
 

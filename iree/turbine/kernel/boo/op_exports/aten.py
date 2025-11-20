@@ -118,7 +118,7 @@ class AtenSignature(OpSignature):
             # Handle tensor arguments.
             match type:
                 case "float":
-                    dtype = float
+                    dtype = torch.float64
                 case "c10::Float":
                     dtype = torch.float32
                 case "c10::Half":
