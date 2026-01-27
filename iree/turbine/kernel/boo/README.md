@@ -57,14 +57,14 @@ w = torch.randn(weight_shape, dtype=dtype, device="cuda:0")
 b = None # optionally fuse with a bias-add
 
 # perform convolution
-y = boo_conv(x,w,b) # can also specify stride, dilation, padding, groups, and layouts (e.g., "NHWC")
+y = boo_conv(x, w, b) # can also specify stride, dilation, padding, groups, and layouts (e.g., "NHWC")
 
 # usual conv kwargs are also available:
-y = boo_conv(x,w,stride=[1,2],dilation=[2,2], padding=[1,0])
+y = boo_conv(x, w, stride=[1,2], dilation=[2,2], padding=[1,0])
 
 # additional kwargs for alternative layouts also available:
-y = boo_conv(x,w, shared_layout="NHWC")
-y = boo_conv(x,w, input_layout="NCHW", kernel_layout="NHWC", output_layout="NCHW")
+y = boo_conv(x, w, shared_layout="NHWC")
+y = boo_conv(x, w, input_layout="NCHW", kernel_layout="NHWC", output_layout="NCHW")
 ```
 
 ### Define signatures from explicit shapes
