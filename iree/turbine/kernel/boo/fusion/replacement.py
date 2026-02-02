@@ -261,14 +261,14 @@ def _replace_sdpa_variant(
             if user.op == "call_function" and user.target == getitem
         ]
     )
-    user_to_replace = None
+    users_to_replace: list[Node] = []
     for user in users_to_process:
         assert isinstance(user.args, tuple) and len(user.args) == 2
         if user.args[1] != 0 and len(user.users) > 0:
             # Auxiliary output is being used downstream - cannot replace
             return
         elif user.args[1] == 0:
-            user_to_replace = user
+            users_to_replace.append(user)
 
     graph = node.graph
 
@@ -282,7 +282,8 @@ def _replace_sdpa_variant(
             args=(query, key, value, attn_mask, dropout_p, is_causal),
             kwargs=new_kwargs,
         )
-    user_to_replace.replace_all_uses_with(replacement, propagate_meta=True)
+    for user_to_replace in users_to_replace:
+        user_to_replace.replace_all_uses_with(replacement, propagate_meta=True)
     for user in users_to_process:
         graph.erase_node(user)
 

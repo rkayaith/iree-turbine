@@ -116,9 +116,13 @@ def _run(
         reference_module = sig.get_nn_module(use_custom=False)
         boo_module = sig.get_compiled_module(backend="iree_boo_experimental")
         sample_args = sig.get_sample_args(device=cpu, seed=seed)
+        gpu_args: list[torch.Tensor] = []
+        for arg in sample_args:
+            assert isinstance(arg, torch.Tensor)
+            gpu_args.append(arg.to(device=cuda, copy=True))
         arg_tensors = {
             "cpu": sample_args,
-            "gpu": tuple(arg.to(device=cuda, copy=True) for arg in sample_args),
+            "gpu": tuple(gpu_args),
         }
 
         result_tensors: dict[str, tuple[torch.Tensor, ...]] = {}

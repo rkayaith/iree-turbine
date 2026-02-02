@@ -46,7 +46,7 @@ def main(print_parameters: bool, trace_path: str):
     def dump_profile(profiler: profile):
         profiler.export_chrome_trace(trace_path)
 
-    def profiler_ctx(enabled: bool = False) -> profile:
+    def profiler_ctx(enabled: bool = False) -> profile | contextlib.AbstractContextManager[None]:
         if not enabled:
             return contextlib.nullcontext()
         return profile(

@@ -59,13 +59,13 @@ def extract_fusion_subgraph_modules(
 
         # Walk producers from root and include them in the subgraph
         worklist = [root]
-        visited_nodes: set = {root}
+        visited_producers: set = {root}
         while len(worklist) > 0:
             # We are treating worklist as a FIFO queue (pop from front).
             # This results in a breadth-first traversal of producers.
             curr_node = worklist.pop(0)
             for producer in curr_node.all_input_nodes:
-                if producer in visited_nodes:
+                if producer in visited_producers:
                     continue
                 if producer in used_nodes:
                     continue
@@ -73,24 +73,24 @@ def extract_fusion_subgraph_modules(
                     continue
                 # Insert producers at the front, since we want to preserve at least some weak ordering of nodes.
                 # Is it possible for this to generate an invalid ordering? (Maybe it's better to just sort node_list after).
-                visited_nodes.add(producer)
+                visited_producers.add(producer)
                 node_list.insert(0, producer)
                 if node_spec.recursive:
                     worklist.append(producer)
 
         # Walk consumers from root and include them in the subgraph
         worklist = [root]
-        visited_nodes: set = {root}
+        visited_consumers: set = {root}
         while len(worklist) > 0:
             curr_node = worklist.pop(0)
             for consumer in curr_node.users:
-                if consumer in visited_nodes:
+                if consumer in visited_consumers:
                     continue
                 if consumer in used_nodes:
                     continue
                 if not node_spec.is_fusable_consumer(consumer):
                     continue
-                visited_nodes.add(consumer)
+                visited_consumers.add(consumer)
                 node_list.append(consumer)
                 if node_spec.recursive:
                     worklist.append(consumer)

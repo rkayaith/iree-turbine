@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 from collections.abc import Sequence
+from typing import cast
 
 import torch
 from torch import fx
@@ -62,9 +63,14 @@ def fusion_transform(
         # This will re-trace the graph in a fake execution context.
         # An added benefit is the canonicalization of each subgraph, which
         # reduces the number of redundant custom ops being generated.
+
+        decompositions_table: dict[torch._ops.OpOverload, Callable] = {}
+        for op, fn in DEFAULT_DECOMPOSITION_TABLE.items():
+            assert isinstance(op, torch._ops.OpOverload)
+            decompositions_table[op] = fn
         decomposed_gm = make_fx(
             subgraph.module,
-            decomposition_table=DEFAULT_DECOMPOSITION_TABLE,
+            decomposition_table=decompositions_table,
             tracing_mode="fake",
         )(*infer_example_inputs(subgraph.module))
         _log_graph_module("Decomposed module", decomposed_gm)
