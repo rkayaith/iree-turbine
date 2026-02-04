@@ -1,8 +1,12 @@
 """Unit tests for the profiler schedule logic in the BOO driver."""
 
+import torch
 from torch.profiler import ProfilerAction
 
-from iree.turbine.kernel.boo.driver.driver import make_profiler_schedule
+from iree.turbine.kernel.boo.driver.driver import (
+    make_profiler_schedule,
+    make_profiler_context,
+)
 
 
 def test_simple_case_no_cleanup():
@@ -110,3 +114,35 @@ def test_four_devices_no_cleanup():
 
     actual = [schedule_fn(step) for step in range(total_num_iters)]
     assert actual == expected
+
+
+def test_profiler_integration():
+    """
+    Integration test: run torch profiler and verify it captures
+    all requested iterations.
+    """
+    timing_iter = 100
+    schedule_fn, total_num_iters, _ = make_profiler_schedule(
+        timing_iter=timing_iter,
+        num_devices=4,
+        iter_thresh=16,
+    )
+
+    x = torch.zeros(1, device='cuda')
+
+    def dummy_kernel():
+        return x + 1
+
+    with make_profiler_context(schedule_fn) as prof:
+        for step in range(total_num_iters):
+            dummy_kernel()
+            prof.step()
+
+    cuda_events = [
+        e for e in prof.events()
+        if e.device_type == torch.profiler.DeviceType.CUDA
+    ]
+
+    assert len(cuda_events) == timing_iter, (
+        f"Expected {timing_iter} CUDA events, got {len(cuda_events)}"
+    )
